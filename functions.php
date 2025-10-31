@@ -284,6 +284,86 @@ function validateMembreData($data) {
     ];
 }
 
+/**
+ * Valide les données d'un événement (sportif ou associatif)
+ * @param array $data Les données à valider
+ * @param string $type Type d'événement ('sport' ou 'asso')
+ * @return array Tableau avec 'valid' (bool) et 'errors' (array de messages)
+ */
+function validateEventData($data, $type = 'sport') {
+    $errors = [];
+
+    // Validation titre (5-200 caractères)
+    if(empty($data['titre'])) {
+        $errors[] = "Le titre est obligatoire.";
+    } elseif(strlen($data['titre']) < 5) {
+        $errors[] = "Le titre doit contenir au moins 5 caractères.";
+    } elseif(strlen($data['titre']) > 200) {
+        $errors[] = "Le titre ne peut pas dépasser 200 caractères.";
+    }
+
+    // Validation descriptif (10-5000 caractères)
+    if(empty($data['descriptif'])) {
+        $errors[] = "Le descriptif est obligatoire.";
+    } elseif(strlen($data['descriptif']) < 10) {
+        $errors[] = "Le descriptif doit contenir au moins 10 caractères.";
+    } elseif(strlen($data['descriptif']) > 5000) {
+        $errors[] = "Le descriptif ne peut pas dépasser 5000 caractères.";
+    }
+
+    // Validation lieu_texte (5-200 caractères)
+    if(empty($data['lieu_texte'])) {
+        $errors[] = "Le lieu est obligatoire.";
+    } elseif(strlen($data['lieu_texte']) < 5) {
+        $errors[] = "Le lieu doit contenir au moins 5 caractères.";
+    } elseif(strlen($data['lieu_texte']) > 200) {
+        $errors[] = "Le lieu ne peut pas dépasser 200 caractères.";
+    }
+
+    // Validation lieu_maps (URL valide ou vide)
+    if(!empty($data['lieu_maps']) && !filter_var($data['lieu_maps'], FILTER_VALIDATE_URL)) {
+        $errors[] = "Le lien Google Maps n'est pas une URL valide.";
+    }
+
+    // Validation dates (format et cohérence)
+    if(empty($data['date_visible'])) {
+        $errors[] = "La date de visibilité est obligatoire.";
+    }
+    if(empty($data['date_cloture'])) {
+        $errors[] = "La date de clôture est obligatoire.";
+    }
+
+    // Validations spécifiques aux événements associatifs
+    if($type === 'asso') {
+        if(empty($data['date_event_asso'])) {
+            $errors[] = "La date de l'événement est obligatoire.";
+        }
+
+        // Validation tarif (nombre positif)
+        if(!isset($data['tarif'])) {
+            $errors[] = "Le tarif est obligatoire.";
+        } elseif(!is_numeric($data['tarif'])) {
+            $errors[] = "Le tarif doit être un nombre.";
+        } elseif($data['tarif'] < 0) {
+            $errors[] = "Le tarif ne peut pas être négatif.";
+        }
+    }
+
+    // Validations spécifiques aux événements sportifs
+    if($type === 'sport') {
+        if(empty($data['id_cat_event'])) {
+            $errors[] = "La catégorie est obligatoire.";
+        } elseif(!is_numeric($data['id_cat_event'])) {
+            $errors[] = "La catégorie sélectionnée n'est pas valide.";
+        }
+    }
+
+    return [
+        'valid' => empty($errors),
+        'errors' => $errors
+    ];
+}
+
 // MEMBRES
 
 /**

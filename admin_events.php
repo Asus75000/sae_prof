@@ -11,13 +11,28 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create'])) {
         $event_type = $_POST['event_type'];
 
         $data = [
-            'titre' => $_POST['titre'],
-            'descriptif' => $_POST['descriptif'],
-            'lieu_texte' => $_POST['lieu_texte'],
-            'lieu_maps' => $_POST['lieu_maps'] ?: null,
+            'titre' => trim($_POST['titre']),
+            'descriptif' => trim($_POST['descriptif']),
+            'lieu_texte' => trim($_POST['lieu_texte']),
+            'lieu_maps' => trim($_POST['lieu_maps']) ?: null,
             'date_visible' => dateToMysql($_POST['date_visible']),
             'date_cloture' => dateToMysql($_POST['date_cloture'])
         ];
+
+        if($event_type === 'sport') {
+            $data['id_cat_event'] = $_POST['id_cat_event'];
+        } else {
+            $data['tarif'] = $_POST['tarif'];
+            $data['prive'] = isset($_POST['prive']) ? 1 : 0;
+            $data['date_event_asso'] = dateToMysql($_POST['date_event_asso']);
+        }
+
+        // Validation des données
+        $validation = validateEventData($data, $event_type);
+        if(!$validation['valid']) {
+            flash(implode('<br>', $validation['errors']), "danger");
+            redirect("admin_events.php?type=$event_type");
+        }
 
         // Validation : la date de visibilité doit être AVANT la date de clôture
         if(strtotime($data['date_visible']) >= strtotime($data['date_cloture'])) {
@@ -26,15 +41,10 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create'])) {
         }
 
         if($event_type === 'sport') {
-            $data['id_cat_event'] = $_POST['id_cat_event'];
             createEventSport($data);
             flash("Événement sportif créé avec succès !", "success");
             redirect("admin_events.php?type=sport");
         } else {
-            $data['tarif'] = $_POST['tarif'];
-            $data['prive'] = isset($_POST['prive']) ? 1 : 0;
-            $data['date_event_asso'] = dateToMysql($_POST['date_event_asso']);
-
             // Validation : la date de clôture doit être AVANT la date de l'événement
             if(strtotime($data['date_cloture']) >= strtotime($data['date_event_asso'])) {
                 flash("La date de clôture des inscriptions doit être avant la date de l'événement.", "danger");
@@ -55,13 +65,28 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
         $event_type = $_POST['event_type'];
 
         $data = [
-            'titre' => $_POST['titre'],
-            'descriptif' => $_POST['descriptif'],
-            'lieu_texte' => $_POST['lieu_texte'],
-            'lieu_maps' => $_POST['lieu_maps'] ?: null,
+            'titre' => trim($_POST['titre']),
+            'descriptif' => trim($_POST['descriptif']),
+            'lieu_texte' => trim($_POST['lieu_texte']),
+            'lieu_maps' => trim($_POST['lieu_maps']) ?: null,
             'date_visible' => dateToMysql($_POST['date_visible']),
             'date_cloture' => dateToMysql($_POST['date_cloture'])
         ];
+
+        if($event_type === 'sport') {
+            $data['id_cat_event'] = $_POST['id_cat_event'];
+        } else {
+            $data['tarif'] = $_POST['tarif'];
+            $data['prive'] = isset($_POST['prive']) ? 1 : 0;
+            $data['date_event_asso'] = dateToMysql($_POST['date_event_asso']);
+        }
+
+        // Validation des données
+        $validation = validateEventData($data, $event_type);
+        if(!$validation['valid']) {
+            flash(implode('<br>', $validation['errors']), "danger");
+            redirect("admin_events.php?type=$event_type&edit=$event_id");
+        }
 
         // Validation : la date de visibilité doit être AVANT la date de clôture
         if(strtotime($data['date_visible']) >= strtotime($data['date_cloture'])) {
@@ -70,7 +95,6 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
         }
 
         if($event_type === 'sport') {
-            $data['id_cat_event'] = $_POST['id_cat_event'];
             if(updateEventSport($event_id, $data)) {
                 flash("Événement sportif modifié avec succès !", "success");
             } else {
@@ -78,10 +102,6 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
             }
             redirect("admin_events.php?type=sport");
         } else {
-            $data['tarif'] = $_POST['tarif'];
-            $data['prive'] = isset($_POST['prive']) ? 1 : 0;
-            $data['date_event_asso'] = dateToMysql($_POST['date_event_asso']);
-
             // Validation : la date de clôture doit être AVANT la date de l'événement
             if(strtotime($data['date_cloture']) >= strtotime($data['date_event_asso'])) {
                 flash("La date de clôture des inscriptions doit être avant la date de l'événement.", "danger");
