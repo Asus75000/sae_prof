@@ -39,10 +39,10 @@ if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['refuser_membre'])) {
         $membre = getMembre($id_membre);
 
         if($membre) {
+            // Mise à jour du statut uniquement (pas de stockage du motif en BD)
             updateMembre($id_membre, [
                 'statut' => 'REFUS',
-                'date_statut' => date('Y-m-d'),
-                'motif_refus' => $motif
+                'date_statut' => date('Y-m-d')
             ]);
 
             // Envoyer un email de refus avec le motif
