@@ -15,6 +15,8 @@
                     <a href="membre.php">Mon Espace</a>
                     <?php if(isAdmin()): ?>
                         <a href="admin.php">Administration</a>
+                    <?php elseif(isGestionnaire()): ?>
+                        <a href="admin_events.php?type=sport">Gestion Événements</a>
                     <?php endif; ?>
                     <a href="auth.php?logout=1">Déconnexion</a>
                 <?php else: ?>

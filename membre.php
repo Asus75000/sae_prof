@@ -282,13 +282,26 @@ include 'header.php';
     <div class="card">
         <h2>Tableau de bord</h2>
         <p>Bienvenue <strong><?= sanitize($membre['prenom']) ?> <?= sanitize($membre['nom']) ?></strong></p>
-        <p>Statut : 
+        <p>Statut :
             <?php if($membre['adherent']): ?>
                 <span class="badge badge-success">Adhérent</span>
             <?php else: ?>
                 <span class="badge badge-warning">Non-adhérent</span>
             <?php endif; ?>
         </p>
+
+        <?php if(!$membre['adherent']): ?>
+        <div style="margin: 20px 0; padding: 20px; background-color: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+            <h3 style="margin-top: 0; color: #856404;">⚠️ Vous n'êtes pas encore adhérent</h3>
+            <p style="color: #856404; margin-bottom: 15px;">
+                En devenant adhérent, vous bénéficierez de l'assurance de l'association et d'un accès privilégié aux événements privés.
+            </p>
+            <button type="button" onclick="showAdherentModal()" class="btn btn-primary">
+                Devenir adhérent de l'association
+            </button>
+        </div>
+        <?php endif; ?>
+
         <div class="mt-20">
             <a href="evenements.php?type=sport" class="btn">Événements Sportifs</a>
             <a href="evenements.php?type=asso" class="btn btn-secondary">Événements Associatifs</a>
@@ -460,5 +473,55 @@ include 'header.php';
         </form>
     </div>
 </div>
+
+<!-- Modal d'adhésion depuis le dashboard -->
+<?php if(!$membre['adherent']): ?>
+<div id="adherent_dashboard_modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 30px; border-radius: 12px; max-width: 500px; margin: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+        <h2 style="margin-top: 0; color: #007bff;">✓ Devenir adhérent</h2>
+        <p style="line-height: 1.6; color: #333; font-size: 1.05em;">
+            En devenant adhérent de l'association KASTA CROSSFIT, vous bénéficierez :
+        </p>
+        <ul style="line-height: 1.8; color: #333;">
+            <li><strong>De l'assurance de l'association</strong></li>
+            <li>D'un accès aux événements privés réservés aux adhérents</li>
+            <li>De tarifs préférentiels sur certains événements</li>
+            <li>Du soutien à la vie associative</li>
+        </ul>
+        <p style="color: #666; font-size: 0.95em; margin-top: 20px;">
+            <em>Note : L'adhésion est définitive et à vie.</em>
+        </p>
+        <form method="POST" style="margin-top: 25px;">
+            <input type="hidden" name="csrf_token" value="<?= $csrf ?>">
+            <input type="hidden" name="adherent" value="1">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button type="submit" name="update" class="btn btn-primary" style="flex: 1; min-width: 200px;">
+                    Confirmer mon adhésion
+                </button>
+                <button type="button" onclick="hideAdherentModal()" class="btn btn-secondary" style="flex: 1; min-width: 150px;">
+                    Annuler
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function showAdherentModal() {
+    document.getElementById('adherent_dashboard_modal').style.display = 'flex';
+}
+
+function hideAdherentModal() {
+    document.getElementById('adherent_dashboard_modal').style.display = 'none';
+}
+
+// Fermer le modal en cliquant en dehors
+document.getElementById('adherent_dashboard_modal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        hideAdherentModal();
+    }
+});
+</script>
+<?php endif; ?>
 
 <?php include 'footer.php'; ?>

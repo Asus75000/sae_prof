@@ -1,7 +1,7 @@
 ﻿<?php
 require_once 'config.php';
 require_once 'functions.php';
-requireAdmin();
+requireGestionnaireOrAdmin();
 
 $id_event_sport = $_GET['id'] ?? null;
 if(!$id_event_sport) redirect('admin_events.php?type=sport');
